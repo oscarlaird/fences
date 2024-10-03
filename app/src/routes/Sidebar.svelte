@@ -31,7 +31,6 @@
     }
 </script>
     
-{JSON.stringify($settings)}
 <div class="sidebar_container flex-1 w-100 h-100 bg-gray-400 p-8 gap-8 flex flex-col">
 
    <Card.Root class="w-100">
@@ -91,7 +90,6 @@
                     </Select.Content>
                 </Select.Root>
             </div>
-            {JSON.stringify($settings.colors)}
             <div class="flex flex-col space-y-1.5">
                 <Label for="theme">Theme</Label>
                 <Select.Root
