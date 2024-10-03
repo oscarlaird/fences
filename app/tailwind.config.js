@@ -55,8 +55,12 @@ const config = {
 				sm: "calc(var(--radius) - 4px)"
 			},
 			fontFamily: {
-				sans: [...fontFamily.sans]
-			}
+				sans: [...fontFamily.sans],
+				crimson: ["Crimson Text", ...fontFamily.serif],
+			},
+			boxShadow: {
+				"heavy": "10px 10px 20px 10px black"
+			},
 		}
 	},
 };

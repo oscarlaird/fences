@@ -1,0 +1,28 @@
+# Compiled binaries
+/target/
+
+# Build artifacts
+**/*.rs.bk
+
+# Rust package manager lock file (if you want to include it in version control, remove this line)
+# Cargo.lock
+
+# Generated WebAssembly files
+wasm/*.wasm
+wasm/*.js
+wasm/*.d.ts
+
+# .DS_Store (MacOS)
+.DS_Store
+
+# Temporary files created by editors or OS
+*.swp
+*.swo
+*.bak
+*.tmp
+*.log
+.idea/
+.vscode/
+
+# Cargo's output folder for benchmarks, tests, etc.
+/bench/

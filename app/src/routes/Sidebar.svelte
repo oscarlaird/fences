@@ -6,71 +6,53 @@
     import { Label } from "$lib/components/ui/label/index.js";
     import { Switch } from "$lib/components/ui/switch/index.js";
     import { RotateCcw } from 'lucide-svelte';
+    import { settings, lines, eventBus } from "$lib/stores.js";
+    import lines_utils from "$lib/lines.js";
+    let color;
 
-    const line_counts = [
-     {
-      value: 36,
-      label: "36"
-     },
-     {
-      value: 360,
-      label: "360"
-     },
-     {
-      value: 3600,
-      label: "3600"
-     },
-     {
-      value: 36000,
-      label: "36000"
-     },
-    ];
+    const line_counts = [ { value: 36, label: "36" }, { value: 360, label: "360" }, { value: 3600, label: "3600" }, { value: 36000, label: "36000" }, ];
 
-    const themes = [
-        {
-        value: "light",
-        label: "Light"
-        },
-        {
-        value: "dark",
-        label: "Dark"
-        },
-        {
-        value: "solarized",
-        label: "Solarized"
-        }
-    ];
+    const themes = [ 
+                     {  label: "Purple", value: { start: "#ff0000", end: "#0000ff", bg: "#000000" } },
+                     {  label: "Black and White", value: { start: "#000000", end: "#000000", bg: "#ffffff" } },
+                     {  label: "Light", value: { start: "#000000", end: "#ffffff", bg: "#ffffff" } },
+                     {  label: "Dark", value: { start: "#ffffff", end: "#000000", bg: "#000000" } },
+                     {  label: "Blues", value: { start: "#0000ff", end: "#00ffff", bg: "#ffffff" } },
+                     {  label: "Pale", value: { start: "#a2d5f2", end: "#f2a2d5", bg: "#ffffff" } },
+                     {  label: "Soft Blues", value: { start: "#a1c4fd", end: "#c2e9fb", bg: "#ffffff" } },
+                     {  label: "Peach", value: { start: "#f6d365", end: "#fda085", bg: "#ffffff" } },
+                ];
 
-    const strokes = [
-        {
-        value: 0.1,
-        label: "0.1"
-        },
-        {
-        value: 0.5,
-        label: "0.5"
-        },
-        {
-        value: 1,
-        label: "1"
-        }
-    ];
+    const strokes = [ { value: 0.05, label: "Thin" }, { value: 0.1, label: "Medium" }, { value: 0.2, label: "Thick" } ];
+
+    function reset() {
+        lines.set(lines_utils.createLines($settings.number_of_lines));
+        console.log("reset");
+    }
 </script>
     
+{JSON.stringify($settings)}
 <div class="sidebar_container flex-1 w-100 h-100 bg-gray-400 p-8 gap-8 flex flex-col">
 
    <Card.Root class="w-100">
-    <Card.Header> <Card.Title>Control</Card.Title> </Card.Header>
+    <Card.Header> <Card.Title class="font-crimson text-4xl font-normal">Control</Card.Title> </Card.Header>
     <Card.Content>
         <!-- TODO: Do I need a form? -->
         <div class="content_box flex flex-col gap-8">
-            <Button class="h-16 text-lg">
+            <Button class="h-16 text-lg" on:click={reset}
+            >
                 <RotateCcw class="mr-3 h-6 w-6" />
                 RESET
             </Button>
             <div class="flex flex-col space-y-1.5">
                 <Label for="number_lines">Number of Lines</Label>
-                <Select.Root>
+                <Select.Root
+                    selected={line_counts[0]}
+                    onSelectedChange={(v) => {
+                        v && ($settings.number_of_lines = v.value);
+                        reset();
+                    }}
+                >
                     <Select.Trigger id="number_lines"> <Select.Value placeholder="Select" /> </Select.Trigger>
                     <Select.Content>
                     {#each line_counts as line_count}
@@ -85,7 +67,7 @@
 
 
    <Card.Root class="w-100">
-    <Card.Header> <Card.Title>Style</Card.Title> </Card.Header>
+    <Card.Header> <Card.Title class="font-crimson text-4xl font-normal">Style</Card.Title> </Card.Header>
     <Card.Content>
         <!-- TODO: Do I need a form? -->
         <div class="content_box flex flex-col gap-8">
@@ -94,19 +76,13 @@
                 <Label for="airplane-mode">Show Arrowheads</Label>
             </div>
             <div class="flex flex-col space-y-1.5">
-                <Label for="theme">Theme</Label>
-                <Select.Root>
-                    <Select.Trigger id="theme"> <Select.Value placeholder="Select" /> </Select.Trigger>
-                    <Select.Content>
-                        {#each themes as theme}
-                            <Select.Item value={theme.value} label={theme.label} >{theme.label}</Select.Item >
-                        {/each}
-                    </Select.Content>
-                </Select.Root>
-            </div>
-            <div class="flex flex-col space-y-1.5">
                 <Label for="stroke">Stroke Width</Label>
-                <Select.Root>
+                <Select.Root
+                    selected={strokes[1]}
+                    onSelectedChange={(v) => {
+                        v && ($settings.stroke_width = v.value);
+                    }}
+                >
                     <Select.Trigger id="stroke"> <Select.Value placeholder="Select" /> </Select.Trigger>
                     <Select.Content>
                         {#each strokes as stroke}
@@ -115,18 +91,45 @@
                     </Select.Content>
                 </Select.Root>
             </div>
+            {JSON.stringify($settings.colors)}
+            <div class="flex flex-col space-y-1.5">
+                <Label for="theme">Theme</Label>
+                <Select.Root
+                    selected={themes[0]}
+                    onSelectedChange={(v) => {
+                        v && ($settings.colors = v.value);
+                    }}
+                >
+                    <Select.Trigger id="theme"> <Select.Value placeholder="Select" /> </Select.Trigger>
+                    <Select.Content>
+                        {#each themes as theme}
+                            <Select.Item value={theme.value} label={theme.label} >{theme.label}</Select.Item >
+                        {/each}
+                    </Select.Content>
+                </Select.Root>
+            </div>
+            <div class="flex flex-row justify-around">
+                <input type=color bind:value={$settings.colors.start} class="block h-16 w-32 rounded-md" />
+                <input type=color bind:value={$settings.colors.end} class="block h-16 w-32 rounded-md" />
+                <input type=color bind:value={$settings.colors.bg} class="block h-16 w-32 rounded-md" />
+            </div>
+            
         </div>
     </Card.Content>
    </Card.Root>
 
 
    <Card.Root class="w-100">
-    <Card.Header> <Card.Title>Export</Card.Title> </Card.Header>
+    <Card.Header> <Card.Title class="font-crimson text-4xl font-normal">Export</Card.Title> </Card.Header>
     <Card.Content>
         <!-- TODO: Do I need a form? -->
         <div class="content_box flex flex-col gap-4">
             <div class="none">
-                <Button>Save Wallpaper as .png</Button>
+                <Button
+                    on:click={() => {
+                        eventBus.set({type: "dl_png"});
+                    }}
+                >Save Wallpaper as .png</Button>
             </div>
             <div class="none">
                 <Button>Save Animation as .gif</Button>
