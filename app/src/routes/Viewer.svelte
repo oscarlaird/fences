@@ -208,7 +208,7 @@
         // STATIC_DRAW hints that this data won't change
         // we are uploading the points array to the gpu for rendering
         gl.bufferData(gl.ARRAY_BUFFER, points, gl.STATIC_DRAW);
-        gl.drawArrays(gl.LINES, 0, points.length / 3);  // 3 floats per point (x, y, alongline)
+        gl.drawArrays(gl.LINES, 0, points.length / (3 * 2));  // 3 floats per point (x, y, alongline), only show half the points
 
         if (download) {
             downloadCanvas();
