@@ -39,7 +39,7 @@ pub fn create_lines(freqs: &[f32], k: f32, line_length: f32, arrowheads: bool) -
     let centers: Vec<Complex<f32>> = ifft(freqs);
 
     // Get the delta values based on the frequency series
-    let delta: Vec<Complex<f32>> = single_freq_tseries(k, line_length / 2.0, max_k);
+    let delta: Vec<Complex<f32>> = single_freq_tseries(k, line_length, max_k);
 
     // Create the lines by calculating the start and end points for each line
     // 3 floats per point (x, y, alongline)
@@ -55,7 +55,8 @@ pub fn create_lines(freqs: &[f32], k: f32, line_length: f32, arrowheads: bool) -
     let tail_length = 0.1; // 10% of the line length
 
     for i in 0..max_k as usize {
-        let start = centers[i] - delta[i];
+        // modified to make start=center so that we rotate about the start/tail of the vector
+        let start = centers[i];
         let end = centers[i] + delta[i];
         lines.push(start.re);
         lines.push(start.im);

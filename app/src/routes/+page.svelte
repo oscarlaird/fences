@@ -1,11 +1,9 @@
 <script>
     import "../app.css";
-    import FenceBox from "./FenceBox.svelte";
-    import lines_utils from "$lib/lines";
     import { Button } from "$lib/components/ui/button";
     import Sidebar from "./Sidebar.svelte";
     import Gallery from "./Gallery.svelte";
-    import { lines, freqs, rot_idx, settings, full_history, derived_freqs, hist_idx, preview_hist_idx, previewing } from "$lib/stores.js";
+    import { settings, full_history, derived_freqs, hist_idx, preview_hist_idx, previewing } from "$lib/stores.js";
     import Viewer from "./Viewer.svelte";
     import Player from "./Player.svelte";
     // function handleKeydown(event) {
@@ -28,8 +26,8 @@
 
 <div on:keydown={handleKeydown} tabindex="0">
 
-<div class="fullscreen flex flex-row h-screen w-screen bg-gray-200">
-    <div class="h-screen w-3/4 z-10">
+<div class="fullscreen flex flex-row h-screen w-screen bg-gray-200 relative">
+    <div class="h-screen flex-1 z-10">
         <div class="bg-[url('/background.png')] bg-cover bg-center w-full h-full">
             <div class="flex flex-col items-center backdrop-blur-md justify-between pt-2 pb-2 gap-4 w-full h-full">
                 <div class="bg-white p-4 flex flex-col items-center gap-2 border-4 border-black rounded-sm shadow-heavy">
@@ -49,7 +47,8 @@
             </div>
         </div>
     </div>
-    <div class="sidebar_and_footer flex flex-col h-screen w-1/4 bg-gray-800">
+    <div class="sidebar_and_footer flex flex-col h-screen max-h-screen overflow-y-scroll w-1/4 min-w-[400px] bg-gray-800
+    ">
         <Sidebar />
         <div class="footer h-16 bg-gray-700 flex flex-row justify-between items-center p-4 text-base text-white">
             <div><a class="hover:underline" href="/help">Help</a></div>

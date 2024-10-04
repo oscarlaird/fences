@@ -24,6 +24,10 @@
 		"clsx": "^2.1.1",
 		"embla-carousel-svelte": "^8.3.0",
 		"lucide-svelte": "^0.447.0",
+		"mode-watcher": "^0.4.1",
+		"png-chunks-encode": "^1.0.0",
+		"png-chunks-extract": "^1.0.0",
+		"svelte-sonner": "^0.3.28",
 		"tailwind-merge": "^2.5.2",
 		"tailwind-variants": "^0.2.1"
 	}

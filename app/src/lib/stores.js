@@ -1,17 +1,16 @@
 import { writable, derived } from "svelte/store";
-import line_utils from "$lib/lines";
 
 const settings = writable({
     number_of_lines: 36,
     stroke_width: 2,
-    color_theme: "dark",
-    arrowheads: false,
+    arrowheads: true,
+    verticalOrientation: false,
+    halfCircle: false,
+    zoom_size: 3.0,
+    log_line_length: [0.0], // the slider component expects to bind to an array
     colors: {start: "#000000", end: "#ffffff", bg: "#000000"}
 });
-const lines = writable(line_utils.createLines(36));
 
-const freqs = writable(Array(36).fill(0.0));
-const rot_idx = writable(0);
 // 5.17006839e+00+0.j,  7.43379412e+00+0.j,  6.16740635e+00+0.j,
 // -1.27419819e+01+0.j, -3.27990480e+01+0.j, -7.14464542e+00+0.j,
 // -1.15105133e+01+0.j,  2.80345463e+01+0.j, -4.38402762e+01+0.j,
@@ -59,8 +58,17 @@ const preview_history = derived([full_history, preview_hist_idx], ([$full_histor
 const previewing = writable(false);
 
 function freqs_from_hist(hist, hist_idx, n_lines) {
+    // this can happen e.g. in restore_metadata
+    // since we have an invalid intermediate state
+    // one correct solution is to put everything in a single store
+    // but for now I just fix hist_idx
+    if (hist_idx > hist.length) {
+        console.log("hist_idx > hist.length");
+        hist_idx = hist.length;
+    }
     // history is a list of tuples (movement_type, amount)
     // movement_type: 0 for rotation, 1 for advance
+    console.log(hist, hist_idx, n_lines);
     let K = n_lines;
     let freqs = Array(K).fill(0.0);    
     let rot_idx = 0;
@@ -75,6 +83,14 @@ function freqs_from_hist(hist, hist_idx, n_lines) {
     return freqs;
 }
 function rot_idx_from_hist(hist, hist_idx, n_lines) {
+    if (hist_idx > hist.length) {
+        // this can happen e.g. in restore_metadata
+        // since we have an invalid intermediate state
+        // one correct solution is to put everything in a single store
+        // but for now I just fix hist_idx
+        console.log("hist_idx > hist.length");
+        hist_idx = hist.length;
+    }
     let rot_idx = 0;
     let K = n_lines;
     for (let i = 0; i < hist_idx; i++) {
@@ -106,8 +122,26 @@ const derived_rot_idx = derived([full_history, hist_idx, previewing, preview_his
     }
 });
 
-const log_line_length = writable([0.0]); // Slider expects an array; 0.0 corresponds to a line length of 1
+const metadata = derived([full_history, hist_idx, settings], ([$full_history, $hist_idx, $settings]) => {
+    return {
+        history: $full_history.slice(0, $hist_idx),
+        settings: $settings,
+    }
+});
 
-const arrowheads = writable(true);
+function restore_metadata(metadata) {
+    // full_history.set(metadata.history);
+    // hist_idx.set(metadata.history.length);
+    // settings.set(metadata.settings);
+    full_history.update(() => {
+        previewing.set(false);
+        hist_idx.set(metadata.history.length);
+        let settings_copy = JSON.parse(JSON.stringify(metadata.settings));
+        settings.set(settings_copy);
+        let history_copy = JSON.parse(JSON.stringify(metadata.history));
+        return history_copy;
+    });
+}
 
-export { settings, lines, eventBus, freqs, rot_idx, full_history, hist_idx, preview_history, preview_hist_idx, previewing, derived_freqs, derived_rot_idx, log_line_length, arrowheads };
+
+export { settings,  eventBus,   full_history, hist_idx, preview_history, preview_hist_idx, previewing, derived_freqs, derived_rot_idx,  metadata, restore_metadata  };

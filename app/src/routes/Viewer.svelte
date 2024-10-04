@@ -1,11 +1,12 @@
 <script>
     import { onMount } from "svelte";
-    import { settings, derived_freqs, derived_rot_idx, log_line_length, arrowheads, eventBus } from "$lib/stores";
+    import { settings, derived_freqs, derived_rot_idx,  eventBus, full_history, metadata } from "$lib/stores";
     import init, { create_lines } from "$lib/wasm/my_webgl_app.js";
     import { tweened } from "svelte/motion";
     import { cubicOut } from "svelte/easing";
     import ZoomBar from "./ZoomBar.svelte";   
     import Help from "./Help.svelte";
+    import { insertMetadataInPNG } from "$lib/png_metadata";
     let canvas;
     let gl;
     let wasm;
@@ -14,12 +15,13 @@
     let alonglineAttributeLocation;
     let resolutionUniformLocation;
     let zoomUniformLocation;
+    let verticalOrientationUniformLocation;
     let colorFgUniformLocation;
     let colorFg2UniformLocation;
     // zoom bar
     let fullscreen = false;
-    let show_help;
-    let zoom_size = 3.0;
+    let show_help = true;
+    $: show_help = $full_history.length <= 1;
     //
     let download = false;
 
@@ -32,8 +34,8 @@
     let tweened_rot = tweened($derived_rot_idx, { duration: 400, easing: cubicOut });
     $: tweened_rot.set($derived_rot_idx);
     // tweened zoom
-    let tweened_zoom = tweened(zoom_size, { duration: 400, easing: cubicOut });
-    $: tweened_zoom.set(zoom_size);
+    let tweened_zoom = tweened($settings.zoom_size, { duration: 400, easing: cubicOut });
+    $: tweened_zoom.set($settings.zoom_size);
 
     // function reset_canvas_dims(fullscreen) {
     //     if (canvas) {
@@ -88,10 +90,16 @@
     attribute float a_alongline;
     uniform vec2 u_resolution;
     uniform float u_zoom_size;
+    uniform int u_vertical_orientation;
     varying float v_alongline;
+
+    mat2 rotate90 = mat2(0.0, 1.0, -1.0, 0.0);
 
     void main() {
         vec2 clipSpace = a_position / u_zoom_size;
+        if (u_vertical_orientation == 1) {
+            clipSpace = rotate90 * clipSpace;
+        }
         clipSpace.x /= u_resolution.x / u_resolution.y;
         gl_Position = vec4(clipSpace, 0, 1);
 
@@ -150,6 +158,7 @@
         alonglineAttributeLocation = gl.getAttribLocation(program, "a_alongline");
         resolutionUniformLocation = gl.getUniformLocation(program, "u_resolution");
         zoomUniformLocation = gl.getUniformLocation(program, "u_zoom_size");
+        verticalOrientationUniformLocation = gl.getUniformLocation(program, "u_vertical_orientation");
         colorFgUniformLocation = gl.getUniformLocation(program, "u_color_fg");
         colorFg2UniformLocation = gl.getUniformLocation(program, "u_color_fg2");
     }
@@ -184,6 +193,8 @@
         gl.lineWidth($settings.stroke_width);
         // zoom
         gl.uniform1f(zoomUniformLocation, $tweened_zoom);
+        // vertical orientation
+        gl.uniform1i(verticalOrientationUniformLocation, $settings.verticalOrientation);
         // set the value of the uniform resolution
         let rect = canvas.getBoundingClientRect();
         canvas.width = rect.width;
@@ -191,13 +202,13 @@
         gl.uniform2f(resolutionUniformLocation, rect.width, rect.height);
         gl.viewport(0, 0, rect.width, rect.height);
         //
-        const line_length = Math.pow(10, $log_line_length);
-        const pointsPtr = create_lines($tweened_freqs, $tweened_rot, line_length, $arrowheads);
+        const line_length = Math.pow(10, $settings.log_line_length);
+        const pointsPtr = create_lines($tweened_freqs, $tweened_rot, line_length, $settings.arrowheads);
         // 3 floats per point (x, y, alongline); 2 points per line; 6 floats per line; 
         // 12 bytes per point; 24 bytes per line
         // WITH ARROWHEADS
         // 3 floats per point (x, y, alongline); 6 points per line; 18 floats per line;
-        let floats_per_line = $arrowheads ? 18 : 6;
+        let floats_per_line = $settings.arrowheads ? 18 : 6;
         let points = new Float32Array(wasm.memory.buffer, pointsPtr, $derived_freqs.length * floats_per_line);
         // console.log("points", points);
 
@@ -208,7 +219,10 @@
         // STATIC_DRAW hints that this data won't change
         // we are uploading the points array to the gpu for rendering
         gl.bufferData(gl.ARRAY_BUFFER, points, gl.STATIC_DRAW);
-        gl.drawArrays(gl.LINES, 0, points.length / (3 * 2));  // 3 floats per point (x, y, alongline), only show half the points
+        let num_lines = points.length / 3
+        // only show half the points
+        if ($settings.halfCircle) { num_lines = num_lines / 2; }
+        gl.drawArrays(gl.LINES, 0, num_lines);  // 3 floats per point (x, y, alongline), only show half the points
 
         if (download) {
             downloadCanvas();
@@ -229,8 +243,15 @@
     function downloadCanvas() {
         const a = document.createElement("a");
         a.download = "fences.png";
-        a.href = canvas.toDataURL("image/png");
+        let url = canvas.toDataURL("image/png");
+        // TODO: add the metadata to the image
+        let json = JSON.stringify($metadata);
+        let newDataURL = insertMetadataInPNG(url, json);
+        a.href = newDataURL;
+        console.log(newDataURL);
         a.click();
+        // revoke
+        URL.revokeObjectURL(url);
     }
 
 
@@ -240,7 +261,7 @@
     class={fullscreen ? "h-screen w-screen fixed top-0 left-0 z-100" : "h-full w-full relative"}
 >
     <div class="absolute top-4 left-4 w-full h-full z-20">
-        <ZoomBar bind:fullscreen bind:show_help bind:zoom_size />
+        <ZoomBar bind:fullscreen bind:show_help bind:zoom_size={$settings.zoom_size} />
     </div> 
     <canvas class="absolute w-full h-full left-0 top-0 z-0"
         class:border-0={fullscreen}

@@ -12,7 +12,7 @@
                 <kbd class="kbc-button w-12 h-12 w">
                     w
                     <div class="absolute -top-1 transform -translate-y-full whitespace-nowrap">
-                        Rotate Clockwise
+                        Clockwise
                     </div>
                 </kbd>
             </div>
@@ -28,7 +28,7 @@
             <kbd class="kbc-button w-12 h-12 s">
                 s
                 <div class="absolute -bottom-3 transform translate-y-full text-center">
-                    Rotate <br><span class="whitespace-nowrap">Counter-Clockwise</span>
+                    <span class="whitespace-nowrap">Counter-Clockwise</span>
                 </div>
             </kbd>
             <kbd class="kbc-button w-12 h-12 d">
