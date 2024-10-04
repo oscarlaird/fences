@@ -7,28 +7,23 @@
     import { Label } from "$lib/components/ui/label/index.js";
     import { Switch } from "$lib/components/ui/switch/index.js";
     import { RotateCcw } from 'lucide-svelte';
-    import { settings, lines, eventBus, freqs, rot_idx, full_history, hist_idx, log_line_length, arrowheads } from "$lib/stores.js";
+    import { settings, lines, eventBus, full_history, hist_idx, log_line_length, arrowheads } from "$lib/stores.js";
     import lines_utils from "$lib/lines.js";
     let color;
 
     const line_counts = [ { value: 36, label: "36" }, { value: 360, label: "360" }, { value: 3600, label: "3600" }, { value: 36000, label: "36000" }, ];
 
     const themes = [ 
+                     {  label: "Dark", value: { start: "#000000", end: "#ffffff", bg: "#000000" } },
+                     {  label: "Light", value: { start: "#ffffff", end: "#000000", bg: "#ffffff" } },
                      {  label: "Purple", value: { start: "#ff0000", end: "#0000ff", bg: "#000000" } },
-                     {  label: "Black and White", value: { start: "#000000", end: "#000000", bg: "#ffffff" } },
-                     {  label: "Light", value: { start: "#000000", end: "#ffffff", bg: "#ffffff" } },
-                     {  label: "Dark", value: { start: "#ffffff", end: "#000000", bg: "#000000" } },
-                     {  label: "Blues", value: { start: "#0000ff", end: "#00ffff", bg: "#ffffff" } },
-                     {  label: "Pale", value: { start: "#a2d5f2", end: "#f2a2d5", bg: "#ffffff" } },
-                     {  label: "Soft Blues", value: { start: "#a1c4fd", end: "#c2e9fb", bg: "#ffffff" } },
-                     {  label: "Peach", value: { start: "#f6d365", end: "#fda085", bg: "#ffffff" } },
+                     {  label: "Blues", value: { start: "#0000ff", end: "#00ffff", bg: "#777777" } },
+                     {  label: "Peach", value: { start: "#f6d365", end: "#fda085", bg: "#777777" } },
                 ];
 
     const strokes = [ { value: 1, label: "Thin" }, { value: 2, label: "Medium" }, { value: 3, label: "Thick" } ];
 
     function reset() {
-        freqs.set(Array($settings.number_of_lines).fill(0));
-        rot_idx.set(0);
         hist_idx.set(0);
         full_history.set([]);
         console.log("reset");
@@ -53,7 +48,6 @@
                     selected={line_counts[0]}
                     onSelectedChange={(v) => {
                         v && ($settings.number_of_lines = v.value);
-                        reset();
                     }}
                 >
                     <Select.Trigger id="number_lines"> <Select.Value placeholder="Select" /> </Select.Trigger>
@@ -77,7 +71,6 @@
             <div class="flex items-center space-x-2">
                 <Switch id="airplane-mode" bind:checked={$arrowheads} />
                 <Label for="airplane-mode">Show Arrowheads</Label>
-                {$arrowheads}
             </div>
             <div class="flex flex-col space-y-1.5">
                 <Label for="stroke">Stroke Width</Label>

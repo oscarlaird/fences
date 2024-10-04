@@ -19,8 +19,10 @@
     $: tweened_chosen_perc.set(chosen_perc);
     function handleMouseMove(event) {
         let frac = (event.clientX - progress_container.getBoundingClientRect().left) / progress_container.clientWidth;
-        preview_n = Math.round(frac * N);
-        preview_n = Math.max(0, Math.min(N, preview_n));
+        // N.B. you'll get bugs if you split this into two lines
+        // if you assign to preview_n in multiple steps, then 
+        // derived stores will react to the intermediate values
+        preview_n = Math.max(0, Math.min(N, Math.round(frac * N)));
         previewing = true;
     }
     function handleMouseLeave(event) {
@@ -47,14 +49,14 @@
 
 </script>
 
-<div class="box h-full pr-8 pl-4 pt-16 pb-16 flex flex-row items-center gap-8">
+<div class="box h-full pr-8 pl-4 flex flex-row items-center gap-8">
     <div class="player_controls flex flex-row bg-white p-2 rounded-md border-gray-500 border-2">
         <Button class="h-10" variant=ghost on:click={goStart}><ChevronFirst class="h-6 w-6" /></Button>
         <Button class="h-10" variant=ghost on:click={prev}><ChevronLeft class="h-6 w-6" /></Button>
         <Button class="h-10" variant=ghost on:click={next}><ChevronRight class="h-6 w-6" /></Button>
         <Button class="h-10" variant=ghost on:click={goEnd}><ChevronLast class="h-6 w-6" /></Button>
     </div>
-    <div class="progress_container flex-1 h-16 flex flex-col justify-center relative "
+    <div class="progress_container flex-1 pt-12 pb-12 flex flex-col justify-center relative"
         bind:this={progress_container}
         on:mousemove={handleMouseMove}
         on:mouseleave={handleMouseLeave}

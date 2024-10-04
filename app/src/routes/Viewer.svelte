@@ -1,9 +1,11 @@
 <script>
     import { onMount } from "svelte";
-    import { settings, derived_freqs, derived_rot_idx, log_line_length, arrowheads } from "$lib/stores";
+    import { settings, derived_freqs, derived_rot_idx, log_line_length, arrowheads, eventBus } from "$lib/stores";
     import init, { create_lines } from "$lib/wasm/my_webgl_app.js";
     import { tweened } from "svelte/motion";
     import { cubicOut } from "svelte/easing";
+    import ZoomBar from "./ZoomBar.svelte";   
+    import Help from "./Help.svelte";
     let canvas;
     let gl;
     let wasm;
@@ -11,8 +13,16 @@
     let positionAttributeLocation;
     let alonglineAttributeLocation;
     let resolutionUniformLocation;
+    let zoomUniformLocation;
     let colorFgUniformLocation;
     let colorFg2UniformLocation;
+    // zoom bar
+    let fullscreen = false;
+    let show_help;
+    let zoom_size = 3.0;
+    //
+    let download = false;
+
     // tweened frequency and rotation index
     let tweened_freqs = tweened($derived_freqs, { duration: 400, easing: cubicOut });
     $: if ($derived_freqs.length !== $tweened_freqs.length) {
@@ -21,6 +31,19 @@
     $: tweened_freqs.set($derived_freqs);
     let tweened_rot = tweened($derived_rot_idx, { duration: 400, easing: cubicOut });
     $: tweened_rot.set($derived_rot_idx);
+    // tweened zoom
+    let tweened_zoom = tweened(zoom_size, { duration: 400, easing: cubicOut });
+    $: tweened_zoom.set(zoom_size);
+
+    // function reset_canvas_dims(fullscreen) {
+    //     if (canvas) {
+    //         const rect = canvas.getBoundingClientRect();
+    //         canvas.width = rect.width;
+    //         canvas.height = rect.height;
+    //         console.log("canvas dims", canvas.width, canvas.height);
+    //     }
+    // }
+    // $: reset_canvas_dims(fullscreen);
 
     onMount(async () => {
         // resize the canvas to its actual size as determined by css
@@ -28,14 +51,22 @@
         const rect = canvas.getBoundingClientRect();
         canvas.width = rect.width;
         canvas.height = rect.height;
-
         //
         console.log("mounted");
         wasm = await init(); // initialize the wasm module
-        // 
+        //
         initWebGL(canvas);
         setup();
         render();
+        // download canvas
+        let unsub_eventBus = eventBus.subscribe((event) => {
+            if (event?.type === "dl_png") {
+                download = true;
+            }
+        });
+        return () => {
+            unsub_eventBus();
+        }
     })
     function initWebGL(canvas) {
         gl = canvas.getContext("webgl");
@@ -56,14 +87,12 @@
     attribute vec2 a_position;
     attribute float a_alongline;
     uniform vec2 u_resolution;
+    uniform float u_zoom_size;
     varying float v_alongline;
 
     void main() {
-        // Convert the position from pixels to clip space
-        // vec2 zeroToOne = a_position / u_resolution;
-        vec2 clipSpace = a_position / 3.0;
-        // vec2 zeroToTwo = zeroToOne * 2.0;
-        // vec2 clipSpace = zeroToTwo - 1.0;
+        vec2 clipSpace = a_position / u_zoom_size;
+        clipSpace.x /= u_resolution.x / u_resolution.y;
         gl_Position = vec4(clipSpace, 0, 1);
 
         v_alongline = a_alongline;
@@ -120,13 +149,12 @@
         positionAttributeLocation = gl.getAttribLocation(program, "a_position");
         alonglineAttributeLocation = gl.getAttribLocation(program, "a_alongline");
         resolutionUniformLocation = gl.getUniformLocation(program, "u_resolution");
+        zoomUniformLocation = gl.getUniformLocation(program, "u_zoom_size");
         colorFgUniformLocation = gl.getUniformLocation(program, "u_color_fg");
         colorFg2UniformLocation = gl.getUniformLocation(program, "u_color_fg2");
     }
     function setup() {
         initShaders();
-        // set the value of the uniform
-        gl.uniform2f(resolutionUniformLocation, gl.canvas.width, gl.canvas.height);
         // buffer
         // Create a buffer and put the points in it
         positionBuffer = gl.createBuffer();
@@ -154,6 +182,14 @@
         gl.clearColor(bg_color[0] / 255.0, bg_color[1] / 255.0, bg_color[2] / 255.0, 1.0);
         // line width
         gl.lineWidth($settings.stroke_width);
+        // zoom
+        gl.uniform1f(zoomUniformLocation, $tweened_zoom);
+        // set the value of the uniform resolution
+        let rect = canvas.getBoundingClientRect();
+        canvas.width = rect.width;
+        canvas.height = rect.height;
+        gl.uniform2f(resolutionUniformLocation, rect.width, rect.height);
+        gl.viewport(0, 0, rect.width, rect.height);
         //
         const line_length = Math.pow(10, $log_line_length);
         const pointsPtr = create_lines($tweened_freqs, $tweened_rot, line_length, $arrowheads);
@@ -174,6 +210,10 @@
         gl.bufferData(gl.ARRAY_BUFFER, points, gl.STATIC_DRAW);
         gl.drawArrays(gl.LINES, 0, points.length / 3);  // 3 floats per point (x, y, alongline)
 
+        if (download) {
+            downloadCanvas();
+            download = false;
+        }
         requestAnimationFrame(render);
     }
     function hexToVec3(hex) {
@@ -186,17 +226,37 @@
         // Return a vec3-like array with values in [0, 255]
         return [r, g, b];
     }
+    function downloadCanvas() {
+        const a = document.createElement("a");
+        a.download = "fences.png";
+        a.href = canvas.toDataURL("image/png");
+        a.click();
+    }
 
 
 </script>
 
-<canvas bind:this={canvas} ></canvas>
+<div 
+    class={fullscreen ? "h-screen w-screen fixed top-0 left-0 z-100" : "h-full w-full relative"}
+>
+    <div class="absolute top-4 left-4 w-full h-full z-20">
+        <ZoomBar bind:fullscreen bind:show_help bind:zoom_size />
+    </div> 
+    <canvas class="absolute w-full h-full left-0 top-0 z-0"
+        class:border-0={fullscreen}
+        class:border={!fullscreen}
+        style:border-color={$settings.colors.end}
+        bind:this={canvas}>
+    </canvas>
+    {#if show_help}
+        <Help />
+    {/if}
+</div>
 
 <style>
     canvas {
         width: 100%;
         height: 100%;
-        border: 2px solid red;
+        border-style: solid;
     }
-    /* TODO: use the fg1 color for the border of the canvas */
 </style>
