@@ -1,15 +1,20 @@
 /* tslint:disable */
 /* eslint-disable */
 /**
+* @param {Float32Array} freqs
+* @param {number} k
+* @param {number} line_length
+* @param {boolean} arrowheads
 * @returns {number}
 */
-export function generate_points(): number;
+export function create_lines(freqs: Float32Array, k: number, line_length: number, arrowheads: boolean): number;
 
 export type InitInput = RequestInfo | URL | Response | BufferSource | WebAssembly.Module;
 
 export interface InitOutput {
   readonly memory: WebAssembly.Memory;
-  readonly generate_points: () => number;
+  readonly create_lines: (a: number, b: number, c: number, d: number, e: number) => number;
+  readonly __wbindgen_malloc: (a: number, b: number) => number;
 }
 
 export type SyncInitInput = BufferSource | WebAssembly.Module;

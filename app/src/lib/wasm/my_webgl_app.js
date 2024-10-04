@@ -1,10 +1,33 @@
 let wasm;
 
+let cachedFloat32ArrayMemory0 = null;
+
+function getFloat32ArrayMemory0() {
+    if (cachedFloat32ArrayMemory0 === null || cachedFloat32ArrayMemory0.byteLength === 0) {
+        cachedFloat32ArrayMemory0 = new Float32Array(wasm.memory.buffer);
+    }
+    return cachedFloat32ArrayMemory0;
+}
+
+let WASM_VECTOR_LEN = 0;
+
+function passArrayF32ToWasm0(arg, malloc) {
+    const ptr = malloc(arg.length * 4, 4) >>> 0;
+    getFloat32ArrayMemory0().set(arg, ptr / 4);
+    WASM_VECTOR_LEN = arg.length;
+    return ptr;
+}
 /**
+* @param {Float32Array} freqs
+* @param {number} k
+* @param {number} line_length
+* @param {boolean} arrowheads
 * @returns {number}
 */
-export function generate_points() {
-    const ret = wasm.generate_points();
+export function create_lines(freqs, k, line_length, arrowheads) {
+    const ptr0 = passArrayF32ToWasm0(freqs, wasm.__wbindgen_malloc);
+    const len0 = WASM_VECTOR_LEN;
+    const ret = wasm.create_lines(ptr0, len0, k, line_length, arrowheads);
     return ret >>> 0;
 }
 
@@ -53,6 +76,7 @@ function __wbg_init_memory(imports, memory) {
 function __wbg_finalize_init(instance, module) {
     wasm = instance.exports;
     __wbg_init.__wbindgen_wasm_module = module;
+    cachedFloat32ArrayMemory0 = null;
 
 
 

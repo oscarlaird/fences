@@ -1,4 +1,5 @@
 <script lang="ts">
+    import { Slider } from "$lib/components/ui/slider";
     import { Button } from "$lib/components/ui/button/index.js";
     import * as Card from "$lib/components/ui/card/index.js";
     import * as Select from "$lib/components/ui/select/index.js";
@@ -6,7 +7,7 @@
     import { Label } from "$lib/components/ui/label/index.js";
     import { Switch } from "$lib/components/ui/switch/index.js";
     import { RotateCcw } from 'lucide-svelte';
-    import { settings, lines, eventBus } from "$lib/stores.js";
+    import { settings, lines, eventBus, freqs, rot_idx, full_history, hist_idx, log_line_length, arrowheads } from "$lib/stores.js";
     import lines_utils from "$lib/lines.js";
     let color;
 
@@ -23,10 +24,13 @@
                      {  label: "Peach", value: { start: "#f6d365", end: "#fda085", bg: "#ffffff" } },
                 ];
 
-    const strokes = [ { value: 0.05, label: "Thin" }, { value: 0.1, label: "Medium" }, { value: 0.2, label: "Thick" } ];
+    const strokes = [ { value: 1, label: "Thin" }, { value: 2, label: "Medium" }, { value: 3, label: "Thick" } ];
 
     function reset() {
-        lines.set(lines_utils.createLines($settings.number_of_lines));
+        freqs.set(Array($settings.number_of_lines).fill(0));
+        rot_idx.set(0);
+        hist_idx.set(0);
+        full_history.set([]);
         console.log("reset");
     }
 </script>
@@ -71,8 +75,9 @@
         <!-- TODO: Do I need a form? -->
         <div class="content_box flex flex-col gap-8">
             <div class="flex items-center space-x-2">
-                <Switch id="airplane-mode" />
+                <Switch id="airplane-mode" bind:checked={$arrowheads} />
                 <Label for="airplane-mode">Show Arrowheads</Label>
+                {$arrowheads}
             </div>
             <div class="flex flex-col space-y-1.5">
                 <Label for="stroke">Stroke Width</Label>
@@ -90,6 +95,12 @@
                     </Select.Content>
                 </Select.Root>
             </div>
+                
+            <div class="flex flex-col space-y-4">
+                <Label>Line Length</Label>
+                <Slider bind:value={$log_line_length} max={1} min={-2} step={0.01} />
+            </div>
+
             <div class="flex flex-col space-y-1.5">
                 <Label for="theme">Theme</Label>
                 <Select.Root
