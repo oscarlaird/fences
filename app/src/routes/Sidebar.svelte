@@ -42,99 +42,7 @@
         </Button>
     </div>
 
-   <Card.Root class="w-100">
-    <Card.Header> <Card.Title class="font-crimson text-4xl font-normal">Style</Card.Title> </Card.Header>
-    <Card.Content>
-        <!-- TODO: Do I need a form? -->
-        <div class="content_box flex flex-col gap-8">
-            <div class="flex flex-row flex-wrap justify-left gap-8">
-                <div class="flex items-center space-x-1">
-                    <Switch id="airplane-mode" bind:checked={$settings.arrowheads} />
-                    <Label for="airplane-mode">Arrowheads</Label>
-                </div>
-                <div class="flex items-center space-x-1">
-                    <Switch id="airplane-mode" bind:checked={$settings.verticalOrientation} />
-                    <Label for="airplane-mode">Vertical</Label>
-                </div>
-                <div class="flex items-center space-x-1">
-                    <Switch id="airplane-mode" bind:checked={$settings.halfCircle} />
-                    <Label for="airplane-mode">Half Circle</Label>
-                </div>
-            </div>
-            <div class="flex flex-col space-y-1.5 text-md">
-                <Label for="number_lines" class="text-sm">Number of Lines</Label>
-                <Select.Root
-                    selected={line_counts[0]}
-                    onSelectedChange={(v) => {
-                        v && ($settings.number_of_lines = v.value);
-                    }}
-                >
-                    <Select.Trigger id="number_lines"> <Select.Value placeholder="Select" /> </Select.Trigger>
-                    <Select.Content>
-                    {#each line_counts as line_count}
-                        <Select.Item value={line_count.value} label={line_count.label} >{line_count.label}</Select.Item >
-                    {/each}
-                    </Select.Content>
-                </Select.Root>
-            </div>
-            <div class="flex flex-col space-y-1.5">
-                <Label for="stroke">Stroke Width</Label>
-                <Select.Root
-                    selected={strokes[1]}
-                    onSelectedChange={(v) => {
-                        v && ($settings.stroke_width = v.value);
-                    }}
-                >
-                    <Select.Trigger id="stroke"> <Select.Value placeholder="Select" /> </Select.Trigger>
-                    <Select.Content>
-                        {#each strokes as stroke}
-                            <Select.Item value={stroke.value} label={stroke.label} >{stroke.label}</Select.Item >
-                        {/each}
-                    </Select.Content>
-                </Select.Root>
-            </div>
-                
-            <div class="flex flex-col space-y-4">
-                <Label>Line Length</Label>
-                <Slider bind:value={$settings.log_line_length} max={1} min={-2} step={0.01} />
-            </div>
-
-            <div class="flex flex-col space-y-1.5">
-                <Label for="theme">Theme</Label>
-                <div class="flex flex-row gap-2 justify-stretch items-center">
-                <Select.Root
-                    selected={themes[0]}
-                    onSelectedChange={(v) => {
-                        v && ($settings.colors = v.value);
-                    }}
-                >
-                    <Select.Trigger id="theme"> <Select.Value placeholder="Select" /> </Select.Trigger>
-                    <Select.Content>
-                        {#each themes as theme}
-                            <Select.Item value={theme.value} label={theme.label} >
-                        <div class="flex flex-row gap-2 justify-between items-center w-full">
-                            <div>
-                                {theme.label}
-                            </div>
-                            <div class="flex flex-row gap-2 justify-stretch items-center">
-                                <input type=color bind:value={theme.value.start} class="block h-8 w-8 rounded-md" />
-                                <input type=color bind:value={theme.value.end} class="block h-8 w-8 rounded-md" />
-                                <input type=color bind:value={theme.value.bg} class="block h-8 w-8 rounded-md" />
-                            </div>
-                        </div>
-                            </Select.Item >
-                        {/each}
-                    </Select.Content>
-                </Select.Root>
-                <input type=color bind:value={$settings.colors.start} class="block h-8 w-12 rounded-md" />
-                <input type=color bind:value={$settings.colors.end} class="block h-8 w-12 rounded-md" />
-                <input type=color bind:value={$settings.colors.bg} class="block h-8 w-12 rounded-md" />
-                </div>
-            </div>
-            
-        </div>
-    </Card.Content>
-   </Card.Root>
+   
 
 
    <Card.Root class="w-100">
@@ -233,5 +141,98 @@
         <!-- </div> -->
     </Card.Content>
    </Card.Root>
-   
+
+  <Card.Root class="w-100">
+    <Card.Header> <Card.Title class="font-crimson text-4xl font-normal">Style</Card.Title> </Card.Header>
+    <Card.Content>
+        <!-- TODO: Do I need a form? -->
+        <div class="content_box flex flex-col gap-8">
+            <div class="flex flex-row flex-wrap justify-left gap-8">
+                <div class="flex items-center space-x-1">
+                    <Switch id="airplane-mode" bind:checked={$settings.arrowheads} />
+                    <Label for="airplane-mode">Arrowheads</Label>
+                </div>
+                <div class="flex items-center space-x-1">
+                    <Switch id="airplane-mode" bind:checked={$settings.verticalOrientation} />
+                    <Label for="airplane-mode">Vertical</Label>
+                </div>
+                <div class="flex items-center space-x-1">
+                    <Switch id="airplane-mode" bind:checked={$settings.halfCircle} />
+                    <Label for="airplane-mode">Half Circle</Label>
+                </div>
+            </div>
+            <div class="flex flex-col space-y-1.5 text-md">
+                <Label for="number_lines" class="text-sm">Number of Lines</Label>
+                <Select.Root
+                    selected={line_counts[0]}
+                    onSelectedChange={(v) => {
+                        v && ($settings.number_of_lines = v.value);
+                    }}
+                >
+                    <Select.Trigger id="number_lines"> <Select.Value placeholder="Select" /> </Select.Trigger>
+                    <Select.Content>
+                    {#each line_counts as line_count}
+                        <Select.Item value={line_count.value} label={line_count.label} >{line_count.label}</Select.Item >
+                    {/each}
+                    </Select.Content>
+                </Select.Root>
+            </div>
+            <div class="flex flex-col space-y-1.5">
+                <Label for="stroke">Stroke Width</Label>
+                <Select.Root
+                    selected={strokes[1]}
+                    onSelectedChange={(v) => {
+                        v && ($settings.stroke_width = v.value);
+                    }}
+                >
+                    <Select.Trigger id="stroke"> <Select.Value placeholder="Select" /> </Select.Trigger>
+                    <Select.Content>
+                        {#each strokes as stroke}
+                            <Select.Item value={stroke.value} label={stroke.label} >{stroke.label}</Select.Item >
+                        {/each}
+                    </Select.Content>
+                </Select.Root>
+            </div>
+                
+            <div class="flex flex-col space-y-4">
+                <Label>Line Length</Label>
+                <Slider bind:value={$settings.log_line_length} max={1} min={-2} step={0.01} />
+            </div>
+
+            <div class="flex flex-col space-y-1.5">
+                <Label for="theme">Theme</Label>
+                <div class="flex flex-row gap-2 justify-stretch items-center">
+                <Select.Root
+                    selected={themes[0]}
+                    onSelectedChange={(v) => {
+                        v && ($settings.colors = v.value);
+                    }}
+                >
+                    <Select.Trigger id="theme"> <Select.Value placeholder="Select" /> </Select.Trigger>
+                    <Select.Content>
+                        {#each themes as theme}
+                            <Select.Item value={theme.value} label={theme.label} >
+                        <div class="flex flex-row gap-2 justify-between items-center w-full">
+                            <div>
+                                {theme.label}
+                            </div>
+                            <div class="flex flex-row gap-2 justify-stretch items-center">
+                                <input type=color bind:value={theme.value.start} class="block h-8 w-8 rounded-md" />
+                                <input type=color bind:value={theme.value.end} class="block h-8 w-8 rounded-md" />
+                                <input type=color bind:value={theme.value.bg} class="block h-8 w-8 rounded-md" />
+                            </div>
+                        </div>
+                            </Select.Item >
+                        {/each}
+                    </Select.Content>
+                </Select.Root>
+                <input type=color bind:value={$settings.colors.start} class="block h-8 w-12 rounded-md" />
+                <input type=color bind:value={$settings.colors.end} class="block h-8 w-12 rounded-md" />
+                <input type=color bind:value={$settings.colors.bg} class="block h-8 w-12 rounded-md" />
+                </div>
+            </div>
+            
+        </div>
+    </Card.Content>
+   </Card.Root> 
 </div>
