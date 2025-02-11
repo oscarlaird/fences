@@ -1,7 +1,7 @@
 <script>
     import { onMount } from "svelte";
     import { settings, derived_freqs, derived_rot_idx,  eventBus, full_history, metadata } from "$lib/stores";
-    import init, { create_lines } from "$lib/wasm/my_webgl_app.js";
+    import init, { create_lines, free_points_ptr } from "$lib/wasm/my_webgl_app.js";
     import { tweened } from "svelte/motion";
     import { cubicOut } from "svelte/easing";
     import ZoomBar from "./ZoomBar.svelte";   
@@ -212,6 +212,7 @@
         let points = new Float32Array(wasm.memory.buffer, pointsPtr, $derived_freqs.length * floats_per_line);
         // console.log("points", points);
 
+
         // TODO: update dynamic buffers
         // setup vertex attributes
         gl.clear(gl.COLOR_BUFFER_BIT);
@@ -219,6 +220,14 @@
         // STATIC_DRAW hints that this data won't change
         // we are uploading the points array to the gpu for rendering
         gl.bufferData(gl.ARRAY_BUFFER, points, gl.STATIC_DRAW);
+        // TODO: free the memory
+        console.log("pts ptr", pointsPtr);
+        // free_points_ptr(pointsPtr);
+        console.log("UNREACHED");
+
+        
+
+
         let num_lines = points.length / 3
         // only show half the points
         if ($settings.halfCircle) { num_lines = num_lines / 2; }
@@ -263,7 +272,7 @@
     <div class="absolute top-4 left-4 w-full h-full z-20">
         <ZoomBar bind:fullscreen bind:show_help bind:zoom_size={$settings.zoom_size} />
     </div> 
-    <canvas class="absolute w-full h-full left-0 top-0 z-0"
+    <canvas class="absolute w-full h-full left-0 top-0 z-0 bg-black"
         class:border-0={fullscreen}
         class:border={!fullscreen}
         style:border-color={$settings.colors.end}

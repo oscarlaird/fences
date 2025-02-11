@@ -49,8 +49,9 @@ const word_gordian_history =[[0, 0], [0, 1], [1, -307.27345750331403], [0, 1], [
 
 const eventBus = writable(null);
 
-const full_history = writable(word_gordian_history); // []
-const hist_idx = writable(word_gordian_history.length); // 0
+let h = [];
+const full_history = writable(h); // []
+const hist_idx = writable(h.length); // 0
 const preview_hist_idx = writable(0);
 const preview_history = derived([full_history, preview_hist_idx], ([$full_history, $preview_hist_idx]) => {
     return $full_history.slice(0, $preview_hist_idx);
@@ -68,7 +69,6 @@ function freqs_from_hist(hist, hist_idx, n_lines) {
     }
     // history is a list of tuples (movement_type, amount)
     // movement_type: 0 for rotation, 1 for advance
-    console.log(hist, hist_idx, n_lines);
     let K = n_lines;
     let freqs = Array(K).fill(0.0);    
     let rot_idx = 0;

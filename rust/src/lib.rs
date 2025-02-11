@@ -1,5 +1,5 @@
 use wasm_bindgen::prelude::*;
-// use web_sys::console;
+use web_sys::console;
 extern crate rustfft;
 use rustfft::{FftPlanner, num_complex::Complex};
 use std::f32::consts::PI;
@@ -27,6 +27,23 @@ fn single_freq_tseries(k: f32, c_k: f32, max_k: i32) -> Vec<Complex<f32>> {
 
     signal
 }
+
+#[wasm_bindgen]
+pub fn free_points_ptr(ptr: *mut f32) {
+    web_sys::console::log_1(&"freeing points".into());
+    web_sys::console::log_1(&JsValue::from_str(&format!("Pointer address: {:?}", ptr as usize)));
+    unsafe {
+        web_sys::console::log_1(&"attempting to rebuild the box from the pointer".into());
+        let box = Box::from_raw(ptr);  // Reclaim the leaked memory, safely deallocating it
+        web_sys::console::log_1(&"rebuilt the box from the pointer".into());
+        drop(box);
+        web_sys::console::log_1(&"droppped the box".into());
+        // drop(Box::from_raw(ptr));  // Reclaim the leaked memory, safely deallocating it
+        
+    }
+    web_sys::console::log_1(&"freeing points".into());
+}
+
 
 #[wasm_bindgen]
 pub fn create_lines(freqs: &[f32], k: f32, line_length: f32, arrowheads: bool) -> *const f32 {

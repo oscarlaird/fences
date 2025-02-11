@@ -32,7 +32,7 @@
     }
 </script>
     
-<div class="sidebar_container flex-1 w-100 h-100 bg-gray-400 p-8 gap-8 flex flex-col overflow-y-scroll">
+<div class="sidebar_container flex-1 w-100 h-100 max-h-screen bg-gray-400 p-8 gap-8 flex flex-col overflow-y-scroll">
 
     <div class="content_box flex flex-col gap-8">
         <Button class="h-16 text-lg bg-red-800" on:click={reset}
@@ -47,7 +47,7 @@
     <Card.Content>
         <!-- TODO: Do I need a form? -->
         <div class="content_box flex flex-col gap-8">
-            <div class="flex flex-row space-x-8">
+            <div class="flex flex-row flex-wrap justify-left gap-8">
                 <div class="flex items-center space-x-1">
                     <Switch id="airplane-mode" bind:checked={$settings.arrowheads} />
                     <Label for="airplane-mode">Arrowheads</Label>
@@ -146,7 +146,8 @@
     </Card.Title> </Card.Header>
     <Card.Content>
         <!-- TODO: Do I need a form? -->
-        <div class="content_box w-100 flex flex-row gap-4 justify-stretch flex-wrap">
+        <i class="mb-4 block">You can load these images later and keep editing them...</i>
+        <div class="content_box w-100 flex flex-row gap-4 justify-stretch">
             <div class="none flex-1">
                 <Button
                     class="w-full flex flex-row gap-2"
@@ -159,43 +160,42 @@
             </div>
             <div class="none flex-1">
                 <Button
+                    variant="outline"
+                    class="w-full flex flex-row gap-2"
+                    on:click={() => {
+                        file_input_element.click();
+                    }}
+                >
+                <ImageUp class="h-6 w-6"/> 
+                Load Saved Drawing</Button>
+                <input type="file" accept="image/png" class="hidden" bind:this={file_input_element}
+                    on:change={(e) => {
+                        const file = e.target.files[0];
+                        console.log(file.name);
+                        const reader = new FileReader();
+                        reader.onload = (e) => {
+                            const dataUrl = e.target.result;
+                            const png_meta = getJsonDataFromPNG(dataUrl);
+                            console.log(png_meta);
+                            if (!png_meta) {
+                                toast.error("Could Not Restore Drawing", {
+                                    description: "No Gordian metadata found in PNG file.",
+                                });
+                                return;
+                            }
+                            restore_metadata(png_meta);
+                        };
+                        reader.readAsDataURL(file);
+                    }}
+                />
+            </div>
+            <!-- <div class="none flex-1">
+                <Button
                     class="w-full flex flex-row gap-2"
                 >
                 <ImagePlay class="h-6 w-6"/> 
                 Animation (.gif)</Button>
-            </div>
-        </div>
-        <i class="mt-4 mb-4 block">You can load these images later and keep editing them...</i>
-        <div class="none flex-1">
-            <Button
-                variant="outline"
-                class="w-full flex flex-row gap-2"
-                on:click={() => {
-                    file_input_element.click();
-                }}
-            >
-            <ImageUp class="h-6 w-6"/> 
-            Load Saved Drawing</Button>
-            <input type="file" accept="image/png" class="hidden" bind:this={file_input_element}
-                on:change={(e) => {
-                    const file = e.target.files[0];
-                    console.log(file.name);
-                    const reader = new FileReader();
-                    reader.onload = (e) => {
-                        const dataUrl = e.target.result;
-                        const png_meta = getJsonDataFromPNG(dataUrl);
-                        console.log(png_meta);
-                        if (!png_meta) {
-                            toast.error("Could Not Restore Drawing", {
-                                description: "No Gordian metadata found in PNG file.",
-                            });
-                            return;
-                        }
-                        restore_metadata(png_meta);
-                    };
-                    reader.readAsDataURL(file);
-                }}
-            />
+            </div> -->
         </div>
     </Card.Content>
    </Card.Root>
@@ -203,8 +203,9 @@
    <Card.Root class="w-100">
     <Card.Header> <Card.Title class="font-crimson text-4xl font-normal">Gallery</Card.Title> </Card.Header>
     <Card.Content>
+        <Gallery />
         <!-- TODO: Do I need a form? -->
-        <div class="content_box flex flex-col gap-8">
+        <!-- <div class="content_box flex flex-col gap-8">
         <div class="content_box flex flex-col gap-8">
             <div class="flex flex-col space-y-1.5">
                 <Label for="number_lines">History</Label>
@@ -228,8 +229,8 @@
                 <Label for="number_lines">Geometric</Label>
                 <Gallery />
             </div>
-        </div>
-        </div>
+        </div> -->
+        <!-- </div> -->
     </Card.Content>
    </Card.Root>
    

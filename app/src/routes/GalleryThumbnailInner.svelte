@@ -1,4 +1,4 @@
-<script>
+<!-- <script>
     export let idx;
     import GalleryThumbnailInner from "./GalleryThumbnailInner.svelte";
     import * as Carousel from "$lib/components/ui/carousel/index.js";
@@ -19,4 +19,4 @@
         hello
         {idx}
     </div>
-</Carousel.Item>
+</Carousel.Item> -->

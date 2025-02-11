@@ -25,6 +25,7 @@
 		"embla-carousel-svelte": "^8.3.0",
 		"lucide-svelte": "^0.447.0",
 		"mode-watcher": "^0.4.1",
+		"onnxruntime-web": "^1.19.2",
 		"png-chunks-encode": "^1.0.0",
 		"png-chunks-extract": "^1.0.0",
 		"svelte-sonner": "^0.3.28",

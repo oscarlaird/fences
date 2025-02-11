@@ -1,6 +1,10 @@
 /* tslint:disable */
 /* eslint-disable */
 /**
+* @param {number} ptr
+*/
+export function free_points_ptr(ptr: number): void;
+/**
 * @param {Float32Array} freqs
 * @param {number} k
 * @param {number} line_length
@@ -13,6 +17,7 @@ export type InitInput = RequestInfo | URL | Response | BufferSource | WebAssembl
 
 export interface InitOutput {
   readonly memory: WebAssembly.Memory;
+  readonly free_points_ptr: (a: number) => void;
   readonly create_lines: (a: number, b: number, c: number, d: number, e: number) => number;
   readonly __wbindgen_malloc: (a: number, b: number) => number;
 }
