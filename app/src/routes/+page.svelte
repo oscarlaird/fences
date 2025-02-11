@@ -44,10 +44,11 @@
                 <!-- <div class="gallery h-1/6 w-full flex flex-row justify-center">
                     <Gallery />
                 </div> -->
-            </div        <div class="footer h-16 bg-gray-700 flex flex-row justify-between items-center p-4 text-base text-white">
+            <!-- </div        <div class="footer h-16 bg-gray-700 flex flex-row justify-between items-center p-4 text-base text-white">
                 <div><a class="hover:underline" href="/help">Help</a></div>
                 <div><a class="hover:underline" href="/about">About</a></div>
-            </div>>
+            -->
+            </div>
         </div>
     </div>
     <div class="sidebar_and_footer flex flex-col h-screen max-h-screen overflow-y-scroll w-1/4 min-w-[400px] bg-gray-800
